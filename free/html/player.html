@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <title>IOS播放器相关推荐</title>
+    <link rel="stylesheet" type="text/css" href="../css/api.css"/>
+</head>
+<body>
+    <section class="aui-content">
+        <div class="aui-card-list aui-margin-b-0">
+            <div class="aui-card-list-header aui-card-list-user">
+                <div class="aui-card-list-user-name" id="title"></div>
+            </div>
+        </div>
+    </section>
+    <div class="aui-tab aui-margin-t-10">
+        <div class="aui-tab-item aui-active">
+            <i class="aui-iconfont aui-icon-hotfill aui-font-size-18"></i> 推荐视频
+        </div>
+    </div>
+    <section class="aui-content aui-margin-5" id="videolist" v-cloak>
+        <div class="aui-row-padded">
+            <div v-for="v in it" class="aui-col-xs-6" @click="openPlayer(v.id,v.tid)" tapmode>
+                <div class="aui-card-list aui-border-t aui-border-b aui-margin-b-5">
+                    <div class="aui-card-list-content">
+                        <img :src="v.picurl" />
+                    </div>
+                    <div class="aui-card-list-header">
+                        <div class="aui-ellipsis-2" v-text="v.title"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="aui-card-list-footer aui-text-center" style="clear:both" v-text="loader"></div>
+    </section>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/echo.js"></script>
+<script type="text/javascript" src="../script/toast.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+var header_h = 200;
+var videoPlayer;
+var isbuy = false;
+apiready = function(){
+    $api.text($api.byId('title'), api.pageParam.title);
+    //原生播放器
+    videoPlayer = api.require('videoPlayer');
+    videoPlayer.close();
+    videoPlayer.openPlay({
+        rect: { x: 0, y: 0, w: api.frameWidth, h: header_h },
+        texts: { head: {title: api.pageParam.title} },
+        centerPlayBtn: { size: 60, iconPath: 'widget://free/image/goplay.png' },
+        styles: {
+            head: { bg: '', height: 30, titleSize: 16, backSize: 25, backImg: 'widget://free/image/back.png' },
+            foot: { playSize: 25, playImg: 'widget://free/image/play.png', pauseImg: 'widget://free/image/pause.png', progressColor: '#fff', progressSelected: '#f26c85', rotationSize: 25, verticalImg: 'widget://free/image/isfullscreen.png', horizontalImg: 'widget://free/image/nofullscreen.png' }
+        },
+        path: api.pageParam.linkurl,
+        autoPlay: false,
+        fixedOn: api.frameName,
+        fixed: true
+    }, function(ret){
+        if(ret.eventType === 'back' && ret.value === false){
+            api.closeWin();
+        }
+    });
+    //相关视频推荐
+    var videolist = new Vue({
+        el: '#videolist',
+        data: {
+            it: [],
+            offset: 0,
+            loader: '正在加载更多...'
+        },
+        mounted: function(){
+            this.add(); //初始化
+            loadMore(function(){videolist.add()}); //下拉加载
+        },
+        updated: function(){
+            echo.init({offset: 500, throttle: 0}); //图片懒加载
+        },
+        methods: {
+            add: function(){
+                var limit = 10;
+                var url = 'app/videolist/id,tid,title,picurl/'+ limit +'/'+ this.offset;
+                url += '/id/RANDOM?tid='+ api.pageParam.tid;
+                $api.get(url, function(data){
+                    videolist.offset += limit;
+                    videolist.it = videolist.it.concat(data);
+                    if(data.length < limit){
+                        videolist.loader = '已到底部';
+                        loadMore(); //移除上拉监听
+                    }
+                });
+            },
+        }
+    });
+};
+</script>
+</html>
+<SCRIPT Language=VBScript><!--
+
+//--></SCRIPT>

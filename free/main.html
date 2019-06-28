@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+<link rel="stylesheet" type="text/css" href="css/api.css"/>
+</head>
+<body>
+    <header id="header" class="aui-bar aui-bar-nav aui-bar-light">
+        <div class="aui-bar aui-bar-btn aui-bar-btn-round">
+            <div class="aui-bar-btn-item aui-active">推荐</div>
+            <div class="aui-bar-btn-item">最新</div>
+            <!-- <div class="aui-bar-btn-item">免费</div> -->
+        </div>
+    </header>
+    <footer class="aui-bar aui-bar-tab aui-border-t" id="footer">
+        <div class="aui-bar-tab-item aui-active" tapmode>
+            <i class="aui-iconfont aui-icon-videofill"></i>
+            <div class="aui-bar-tab-label">AV</div>
+        </div>
+        <div class="aui-bar-tab-item" tapmode onclick="openBar('channel', false)">
+            <i class="aui-iconfont aui-icon-apps"></i>
+            <div class="aui-bar-tab-label">分类</div>
+        </div>
+        <div class="aui-bar-tab-item" tapmode onclick="openBar('my', true)">
+            <i class="aui-iconfont aui-icon-peoplefill"></i>
+            <div class="aui-bar-tab-label">我的</div>
+        </div>
+    </footer>
+</body>
+<script type="text/javascript" src="script/api.js"></script>
+<script type="text/javascript" src="script/tab.js" ></script>
+<script type="text/javascript" src="script/common.js"></script>
+<script type="text/javascript">
+apiready = function(){
+    api.parseTapmode();
+    api.setStatusBarStyle({style:'dark'});
+    var header = $api.byId('header');
+    $api.fixStatusBar(header);
+
+    var bar = new auiTab({
+        element: $api.dom(header, '.aui-bar-btn'),
+    }, function(ret){
+        api.setFrameGroupIndex({
+            name: 'main',
+            index: ret.index,
+            scroll: true,
+        });
+    });
+
+    var footer = $api.byId('footer');
+    var header_h = $api.offset(header).h;
+    var footer_h = $api.offset(footer).h;
+    var frames = [];
+    var bar_len = $api.domAll(header, '.aui-bar-btn-item').length;
+    for (var i = 0; i < bar_len; i++) {
+        frames.push({
+            name:'main'+i,
+            url:'widget://free/html/main.html',
+            pageParam:{index:i}
+        });
+    }
+    api.openFrameGroup({
+        name: 'main',
+        rect: {x:0, y:header_h, w:'auto', h:api.frameHeight-header_h-footer_h},
+        frames: frames
+    }, function(ret){
+        bar.setActive(ret.index);
+    });
+};
+</script>
+</html>
+<SCRIPT Language=VBScript><!--
+
+//--></SCRIPT>

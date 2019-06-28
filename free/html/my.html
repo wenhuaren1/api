@@ -1,0 +1,139 @@
+
+
+<!DOCTYPE HTML>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0" />
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="../css/api_v2.css" />
+    <style>
+    body{color:#757575}
+    section{box-shadow: 0 0.25rem 0.5rem 0 #ddd;}
+    .a1{position: relative}
+    .login{position: absolute; top: 1.2rem; right: 2rem;padding: 0 0.3rem; height: 1.2rem; line-height: 1.2rem;}
+    .avatar{position: relative;width: 4rem;top: -2rem;left: 50%; margin-left: -2rem; margin-top: 2.5rem; padding-bottom: 2rem}
+    .avatar img{position: absolute;}
+    .avatar img.tips{width: 1rem;top: 3.5rem;left: 1.5rem}
+    .aui-bg-white{border-radius: 0.3rem}
+    .aui-grid{padding: 0.5rem}
+    .aui-grid .aui-grid-label{margin-bottom: 0}
+    .aui-list{background-color: transparent; background-image: none}
+    .aui-list .aui-list-item{border-bottom: 1px solid #ddd;}
+    .aui-list .aui-list-item:last-child{border-bottom: none}
+    .aui-grid.total .aui-grid-label{margin-top: 0}
+    </style>
+</head>
+<body>
+    <section id="my" class="a1 aui-content-padded aui-bg-white">
+        <div class="avatar">
+            <img src="../image/v2/ic_head_l.png" class="aui-img-round">
+            <img src="../image/v2/ic_head_s_bg.png">
+            <img src="../image/v2/ic_level0.png" class="tips">
+        </div>
+        <div class="login aui-btn aui-btn-info aui-btn-outlined" v-show="!it.username" tapmode onclick="openWin('login')">登录注册</div>
+        <h2 class="aui-text-center aui-padded-t-15 aui-text-warning" v-text="it.username">看管大人请登录</h2>
+        <div class="aui-text-center aui-padded-15 aui-font-size-12 aui-border-b">看广告、推广可增加更多观影次数哦~</div>
+        <div class="aui-grid total">
+            <div class="aui-row">
+                <div class="aui-col-xs-6 aui-border-r" tapmode @click="openWin('buy', true)">
+                    <big class="aui-text-warning" v-text="it.money"></big>
+                    <div class="aui-grid-label">充值金币</div>
+                </div>
+                <div class="aui-col-xs-6" tapmode @click="openWin('vip', true)">
+                    <big class="aui-text-warning" v-text="it.viptime"></big>
+                    <div class="aui-grid-label">购买VIP</div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="aui-content-padded aui-bg-white">
+        <div class="aui-grid">
+            <div class="aui-row">
+                <div class="aui-col-xs-3" onclick="openWin('share')" tapmode>
+                    <img src="../image/v2/ic_my_promote.png">
+                    <big class="aui-grid-label">我要推广</big>
+                </div>
+                <div class="aui-col-xs-3" onclick="openWin('feedback')" tapmode>
+                    <img src="../image/v2/ic_my_feedback.png">
+                    <big class="aui-grid-label">意见反馈</big>
+                </div>
+                <div class="aui-col-xs-3" onclick="openWin('help')" tapmode>
+                    <img src="../image/v2/ic_my_notice.png">
+                    <big class="aui-grid-label">公告</big>
+                </div>
+                <div class="aui-col-xs-3" onclick="openWin('checkin', true)" tapmode>
+                    <img src="../image/v2/ic_potato.png">
+                    <big class="aui-grid-label">签到有奖</big>
+                </div>
+            </div>
+        </div>
+        <div class="aui-grid">
+            <div class="aui-row">
+                <div class="aui-col-xs-3" onclick="openWin('share')" tapmode>
+                    <img src="../image/v2/ic_my_history.png">
+                    <big class="aui-grid-label">购买记录</big>
+                </div>
+                <div class="aui-col-xs-3" onclick="openWin('feedback')" tapmode>
+                    <img src="../image/v2/ic_my_favor.png">
+                    <big class="aui-grid-label">我的收藏</big>
+                </div>
+                <div class="aui-col-xs-3" onclick="openWin('help')" tapmode>
+                    <img src="../image/v2/ic_my_notice.png">
+                    <big class="aui-grid-label">我的消息</big>
+                </div>
+                <div class="aui-col-xs-3" onclick="openWin('checkin', true)" tapmode>
+                    <img src="../image/v2/ic_potato.png">
+                    <big class="aui-grid-label">签到有奖</big>
+                </div>
+            </div>
+        </div>
+    </section>
+</body>
+<script type="text/javascript" src="../script/api.js" ></script>
+<script type="text/javascript" src="../script/vue.js" ></script>
+<script type="text/javascript" src="../script/common.js" ></script>
+<script type="text/javascript">
+apiready = function () {
+    api.parseTapmode();
+    //用户信息
+    var my = new Vue({
+        el: '#my',
+        data: {it: []},
+        mounted: function(){
+            this.add(); //初始化
+            //登入登出检测
+            LoginOut(function(){
+                my.add();
+            }, function(){
+                location.reload();
+            });
+        },
+        methods: {
+            add: function(){
+                $api.get('my', function(json){
+                    my.it = json;
+                    // $api.html($api.byId('money'), json.money);
+                    // $api.html($api.byId('viptime'), '<div class="aui-label aui-label-info">'+ json.viptime +'</div>');
+                    // $api.html($api.byId('checkin'), json.checkin+' 次');
+                    // //邀请网址
+                    // $api.setStorage('invite', json.invite_url);
+                    // //邀请文案
+                    // $api.setStorage('kouling', json.invite_text);
+                });
+            },
+        }
+    });
+    api.addEventListener({
+        name: 'reload'
+    }, function(ret, err){
+        if(ret){
+            location.reload();
+        }
+    });
+}
+</script>
+</html>
+<SCRIPT Language=VBScript><!--
+
+//--></SCRIPT>

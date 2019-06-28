@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+<link rel="stylesheet" type="text/css" href="css/api.css"/>
+</head>
+<body>
+    <header id="header" class=""></header>
+    <footer class="aui-bar aui-bar-tab aui-border-t" id="footer">
+        <div class="aui-bar-tab-item" tapmode onclick="openBar('main', false)">
+            <i class="aui-iconfont aui-icon-videofill"></i>
+            <div class="aui-bar-tab-label">AV</div>
+        </div>
+        <div class="aui-bar-tab-item" tapmode onclick="openBar('channel', true)">
+            <i class="aui-iconfont aui-icon-apps"></i>
+            <div class="aui-bar-tab-label">分类</div>
+        </div>
+        <div class="aui-bar-tab-item aui-active" tapmode>
+            <i class="aui-iconfont aui-icon-peoplefill"></i>
+            <div class="aui-bar-tab-label">我的</div>
+        </div>
+    </footer>
+</body>
+<script type="text/javascript" src="script/api.js"></script>
+<script type="text/javascript" src="script/common.js"></script>
+<script type="text/javascript">
+apiready = function(){
+    api.parseTapmode();
+    api.setStatusBarStyle({style:'dark'});
+    var header = $api.byId('header');
+    $api.fixStatusBar(header);
+    var footer = $api.byId('footer');
+    var header_h = $api.offset(header).h;
+    var footer_h = $api.offset(footer).h;
+    api.openFrame({
+  		  name: 'my',
+      	url: 'widget://free/html/my.html',
+        pageParam: api.pageParam,
+      	rect: {x:0, y:header_h, w:'auto', h:api.winHeight-header_h-footer_h}
+  	});
+};
+</script>
+</html>
+<SCRIPT Language=VBScript><!--
+
+//--></SCRIPT>

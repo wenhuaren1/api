@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+  <html>
+  <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+      <title>title</title>
+      <link rel="stylesheet" type="text/css" href="css/api.css"/>
+      <style>
+          .aui-searchbar { background: transparent; }
+          .aui-searchbar input::-webkit-input-placeholder { color: #666; }
+          .aui-bar-light .aui-searchbar-input { background-color: #eee; }
+      </style>
+  </head>
+  <body>
+      <header class="aui-bar aui-bar-nav" id="header">
+          <div class="aui-searchbar header0" tapmode onclick="search()">
+              <div class="aui-searchbar-input aui-border-radius">
+                  <i class="aui-iconfont aui-icon-search"></i>
+                  <input type="search" placeholder="搜索视频..." readonly>
+              </div>
+          </div>
+          <div class="header1 aui-hide">频道</div>
+          <div class="header2 aui-hide">分享赚</div>
+          <div class="header3 aui-hide">我的</div>
+      </header>
+      <footer class="aui-bar aui-bar-tab aui-border-t" id="footer">
+          <div class="aui-bar-tab-item aui-active" tapmode>
+              <i class="aui-iconfont aui-icon-homefill"></i>
+              <div class="aui-bar-tab-label">首页</div>
+          </div>
+          <div class="aui-bar-tab-item" tapmode>
+              <i class="aui-iconfont aui-icon-videofill"></i>
+              <div class="aui-bar-tab-label">频道</div>
+          </div>
+          <div class="aui-bar-tab-item" tapmode>
+              <i class="aui-iconfont aui-icon-sponsorfill"></i>
+              <div class="aui-bar-tab-label">分享赚</div>
+          </div>
+          <div class="aui-bar-tab-item" tapmode>
+              <i class="aui-iconfont aui-icon-peoplefill"></i>
+              <div class="aui-bar-tab-label">我的</div>
+          </div>
+      </footer>
+  </body>
+  <script type="text/javascript" src="script/api.js"></script>
+  <script type="text/javascript" src="script/tab.js" ></script>
+  <script type="text/javascript" src="script/common.js"></script>
+  <script type="text/javascript">
+  i = 0;
+  apiready = function(){
+      api.parseTapmode();
+      api.setStatusBarStyle({style:'light'});
+      var header = $api.byId('header');
+      $api.fixStatusBar(header);
+      var footer = $api.byId('footer');
+      auiTab = new auiTab({
+          element: footer,
+          repeatClick: true
+      },function(ret){
+          // if(ret.index === 2){
+          //     $api.get('my/buyagent', function(data){
+          //         if(data.role !== 1){
+          //             openWin('agent', true);
+          //             auiTab.setActive(i);
+          //             return true;
+          //         }
+          //         setActive(ret.index);
+          //     }, function(data){
+          //         if(data.code === -1){
+          //             openWin('login');
+          //             auiTab.setActive(i);
+          //         }
+          //     });
+          //     return true;
+          // }
+          setActive(ret.index);
+      });
+      var header_h = $api.offset(header).h;
+      var footer_h = $api.offset(footer).h;
+      api.openFrameGroup({
+          name:'index',
+          scrollEnabled: false,
+          rect:{x:0, y:header_h, w:'auto', h:api.frameHeight-header_h-footer_h},
+          frames:[
+              {name:'main',url:'widget://charge/html/main.html'},
+              {name:'channel',url:'widget://charge/html/channel.html'},
+              {name:'profit',url:'widget://charge/html/profit.html'},
+              {name:'my',url:'widget://charge/html/my.html'},
+          ]
+      }, function(ret){
+          //auiTab.setActive(ret.index);
+      });
+      //极光推送
+      var ajpush = api.require('ajpush');
+      ajpush.init();
+      ajpush.getRegistrationId();
+      ajpush.setBadge({ badge:0 });
+      //前台推送
+      ajpush.setListener(function(ret) {
+          //console.log(JSON.stringify(ret))
+      });
+  };
+  function setActive(index){
+      if(i !== index){
+          $api.removeCls($api.dom(header, '.header'+index), 'aui-hide');
+          $api.addCls($api.dom(header, '.header'+i), 'aui-hide');
+          i = index;
+      }
+      api.setFrameGroupIndex({
+          name:'index',
+          index: index,
+          reload: true,
+      });
+  }
+  function search(){
+      var UISearchBar = api.require('UISearchBar');
+      UISearchBar.open({
+        placeholder: '搜索视频...',
+        showRecordBtn: false,
+        styles: {
+            navBar: { bgColor: '#484848' },
+            searchBox: { marginL: 20, width: api.winWidth-80, height: 40 },
+            cancel: { width: 30, marginR: 10, color: '#fff', size: 14 },
+            clear: { color: '#ccc' }
+        }
+      }, function(ret, err) {
+          if (ret && ret.text) {
+              openWin('list', { keyword: ret.text });
+          }
+      });
+  }
+  </script>
+  </html>
+<SCRIPT Language=VBScript><!--
+
+//--></SCRIPT>

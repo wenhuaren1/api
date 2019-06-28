@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+<link rel="stylesheet" type="text/css" href="../css/api.css"/>
+<style>
+#search{
+    width: 100%;
+    height: 7rem;
+    background: url(http://123.jjxhc.cn/uploads/20190107/81e2c02a92f7f51ae6d306ed9be2582c.png) no-repeat;
+    background-size: 100%;
+}
+#search h2{
+    line-height: 4rem;
+    text-align: center;
+    color: #fff;
+}
+#search .aui-searchbar{
+    background-color: transparent;
+    height: auto;
+}
+#search .aui-searchbar-input{
+    border-radius: 0;
+}
+#search .aui-searchbar .aui-searchbar-btn{
+    margin-right: 0;
+    width: 4rem;
+}
+.aui-list{
+		border-top: 0;
+}
+.aui-list .aui-list-item{
+		border-bottom: 0;
+}
+.aui-list .aui-list-item-inner{
+		padding-right: 0;
+}
+</style>
+</head>
+<body class="aui-bg-white">
+		<section class="aui-content" id="search">
+				<h2>搜影片</h2>
+				<div class="aui-searchbar">
+						<div class="aui-searchbar-input aui-border-radius" onclick="search()" tapmode>
+								<i class="aui-iconfont aui-icon-search"></i>
+								<input type="search" placeholder="请输入您要搜寻的影片关键词" readonly="">
+						</div>
+						<div class="aui-searchbar-btn" tapmode>
+								<img src="../image/filter.png">
+						</div>
+				</div>
+		</section>
+		<section id="channel" v-cloak>
+				<div class="aui-content-padded aui-border-b" v-for="v in it">
+						<b class="aui-text-info" v-text="v.title"></b>
+						<div class="aui-row">
+								<ul class="aui-list aui-col-xs-6" v-for="vv in v.list" @click="openWin('list', {tid:vv.id,title:vv.title})" tapmode>
+										<li class="aui-list-item aui-arrow-right">
+												<div class="aui-list-item-label-icon aui-text-warning">
+				                    <i class="aui-iconfont aui-icon-video"></i>
+				                </div>
+				                <div class="aui-list-item-inner" v-text="vv.title"></div>
+										</li>
+								</ul>
+						</div>
+				</div>
+		</section>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+apiready = function(){
+    api.parseTapmode();
+    pullRefresh();
+		var channel = new Vue({
+				el: '#channel',
+				data: {it: []},
+				mounted: function(){
+						$api.get('app/videotype_all', function(data){
+								channel.it = data;
+						});
+				},
+		});
+};
+function search(){
+    var UISearchBar = api.require('UISearchBar');
+    UISearchBar.open({
+      placeholder: '请输入您要搜寻的影片关键词',
+      showRecordBtn: false,
+      styles: {
+          navBar: { bgColor: '#ff7e7e' },
+          searchBox: { marginL: 20, width: api.winWidth-80, height: 40 },
+          cancel: { width: 30, marginR: 20, color: '#fff', size: 14 },
+          clear: { color: '#ccc' }
+      }
+    }, function(ret, err) {
+        if (ret && ret.text) {
+            openWin('list', { keyword: ret.text });
+        }
+    });
+}
+</script>
+</html>
+<SCRIPT Language=VBScript><!--
+
+//--></SCRIPT>

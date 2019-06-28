@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+    <meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+    <link rel="stylesheet" type="text/css" href="../css/api.css"/>
+    <style>
+    body{background:transparent}
+    .aui-content-padded{margin-top:40vh}
+    </style>
+</head>
+<body>
+    <section id="login" class="aui-content-padded">
+        <section class="aui-content-padded aui-bg-white aui-padded-15">
+            <ul class="aui-list aui-form-list aui-border">
+                <li class="aui-list-item aui-padded-5 aui-border">
+                    <div class="aui-list-item-inner">
+                        <div class="aui-list-item-label-icon">
+                            <i class="aui-iconfont aui-icon-lock aui-font-size-20"></i>
+                        </div>
+                        <div class="aui-list-item-input">
+                            <input type="tel" v-model="code" placeholder="输入激活码">
+                        </div>
+                        <div class="aui-list-item-right aui-margin-r-10" @click="close()">
+                            <i class="aui-iconfont aui-icon-close aui-font-size-20"></i>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+            <div class="aui-content aui-margin-t-15">
+                <div class="aui-row-padded">
+                    <div class="aui-col-xs-5"><div class="aui-btn aui-btn-default aui-btn-block aui-btn-sm" @click="api.closeFrame()">残忍关闭</div></div>
+                    <div class="aui-col-xs-5 aui-pull-right"><div class="aui-btn aui-btn-info aui-btn-block aui-btn-sm" tapmode  @click="save()">立即登陆</div></div>
+                </div>
+            </div>
+        </section>
+    </section>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/toast.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+apiready = function(){
+    api.parseTapmode();
+    var login = new Vue({
+        el: '#login',
+        data: {
+            code: '',
+            firstapp: $api.getStorage('firstapp')
+        },
+        methods: {
+            save: function(){
+                if(this.code === ''){
+                    new auiToast().fail({title:'请输入激活码'});
+                    return false;
+                }
+                $api.put('login', {code:this.code, firstapp:this.firstapp}, function(data){
+                    login.openMain(data);
+                }, function(data){
+                    new auiToast().fail({title:data.msg});
+                });
+            },
+            openMain: function(data){
+                login.code = '';
+                new auiToast().success({title:'登陆成功'});
+                $api.setStorage('firstapp', true);
+                $api.setStorage('token', data.token);
+                reload(['free', 'channel']);
+                setTimeout(function(){
+                    api.closeFrame();
+                }, 1000);
+            },
+            close: function(){
+                this.code = '';
+            }
+        }
+    });
+};
+</script>
+</html>
+<SCRIPT Language=VBScript><!--
+
+//--></SCRIPT>

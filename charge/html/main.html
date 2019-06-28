@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+  <html>
+  <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+      <title>title</title>
+      <link rel="stylesheet" type="text/css" href="../css/api.css"/>
+      <link rel="stylesheet" type="text/css" href="../css/swiper.css"/>
+      <style>
+          .aui-grid img{ height:1.4rem; display:inline }
+          .aui-grid [class*=aui-col-]{padding:0.5rem 0}
+          .aui-grid .aui-grid-label{margin-top:0}
+      </style>
+  </head>
+  <body>
+      <section id="swiper" class="swiper-container">
+          <div class="swiper-wrapper">
+              <div v-for="v in it" @click="openWin('web', {title:v.title,url:v.linkurl})" class="swiper-slide" tapmode>
+                  <img :data-src="v.picurl" class="swiper-lazy" />
+              </div>
+          </div>
+          <div id="pagination" class="swiper-pagination"></div>
+      </section>
+      <section id="notice" @click="openWin('web', {title:it.title,url:it.linkurl})" class="aui-content aui-bg-white aui-margin-b-10">
+          <div class="aui-info aui-padded-l-15 aui-padded-r-15">
+              <div class="aui-info-item">
+                  <i class="aui-iconfont aui-icon-notificationfill aui-text-info aui-margin-r-10 aui-font-size-20"></i>
+                  <span v-text="it.title"></span>
+              </div>
+          </div>
+      </section>
+      <section class="aui-grid">
+          <div class="aui-row">
+              <div class="aui-col-xs-4" onclick="openWin('buy', true)" tapmode>
+                  <i class="aui-iconfont aui-icon-rechargefill aui-text-info"></i>
+                  <div class="aui-grid-label">充值金币</div>
+              </div>
+              <div class="aui-col-xs-4" onclick="openWin('checkin', true)" tapmode>
+                  <img src="../image/checkin.png">
+                  <div class="aui-grid-label">签到有奖</div>
+              </div>
+              <div class="aui-col-xs-4" onclick="openWin('share', true)" tapmode>
+                  <i class="aui-iconfont aui-icon-forwardfill aui-text-info"></i>
+                  <div class="aui-grid-label">邀请好友</div>
+              </div>
+          </div>
+      </section>
+      <div class="aui-tab aui-margin-t-10" id="tab">
+          <div class="aui-tab-item aui-active" tapmode>
+              <i class="aui-iconfont aui-icon-hotfill aui-font-size-18"></i> 推荐视频
+          </div>
+          <div class="aui-tab-item" tapmode>
+              <i class="aui-iconfont aui-icon-tagfill aui-font-size-18"></i> 每日最新
+          </div>
+      </div>
+      <section class="aui-content aui-margin-5" id="videolist">
+          <div class="aui-row-padded">
+              <div v-for="v in it" class="aui-col-xs-6" @click="openPlayer(v.id,v.tid, v.price)" tapmode>
+                  <div class="aui-card-list aui-border-t aui-border-b aui-margin-b-5">
+                      <div class="aui-card-list-content">
+                          <img :src="v.picurl" />
+                      </div>
+                      <div class="aui-card-list-header">
+                          <div class="aui-ellipsis-2" v-text="v.title"></div>
+                      </div>
+                  </div>
+              </div>
+          </div>
+          <div class="aui-card-list-footer aui-text-center" style="clear:both" v-text="loader"></div>
+      </section>
+  </body>
+  <script type="text/javascript" src="../script/api.js"></script>
+  <script type="text/javascript" src="../script/swiper.js"></script>
+  <script type="text/javascript" src="../script/tab.js"></script>
+  <script type="text/javascript" src="../script/echo.js"></script>
+  <script type="text/javascript" src="../script/vue.js"></script>
+  <script type="text/javascript" src="../script/common.js"></script>
+  <script type="text/javascript">
+      apiready = function(){
+          api.parseTapmode();
+          pullRefresh();
+          //轮播图
+          var swiper = new Vue({
+              el: '#swiper',
+              data: {it: []},
+              mounted: function(){
+                  $api.get('app/adv/id,picurl,linkurl/5?type=1', function(json){
+                      swiper.it = json;
+                  });
+              },
+              updated: function(){
+                  new Swiper('#swiper', {
+                      loop: true,
+                      autoplay: true,
+                      pagination: {el: '#pagination'},
+                      lazy: {loadPrevNext: true},
+                  });
+              },
+          });
+          //公告
+          var notice = new Vue({
+              el: '#notice',
+              data: {cache: [], it: {}},
+              mounted: function(){
+                  $api.get('app/apptext/id,title,linkurl/10/0/createtime/desc?type=101', function(json){
+                      notice.cache = json;
+                      notice.timer();
+                  });
+              },
+              methods: {
+                  timer: function(){
+                      var i = 0;
+                      notice.it = notice.cache[i++];
+                      setInterval(function(){
+                          if(i+1 > notice.cache.length){
+                              i = 0;
+                          }
+                          notice.it = notice.cache[i++];
+                      }, 5000)
+                  },
+              }
+          });
+          var videolist = new Vue({
+              el: '#videolist',
+              data: {
+                  it: [],
+                  offset: 0,
+                  flag: 1,
+                  loader: '正在加载更多...'
+              },
+              mounted: function(){
+                  this.add(); //初始化
+                  loadMore(function(){videolist.add()}); //下拉加载
+              },
+              updated: function(){
+                  echo.init({offset: 500, throttle: 0}); //图片懒加载
+              },
+              methods: {
+                  add: function(){
+                      var limit = 6;
+                      var url = 'app/videolist/id,tid,price,title,picurl/';
+                      url += limit +'/'+ this.offset +'/createtime/desc?flag='+ this.flag;
+                      $api.get(url, function(json){
+                          videolist.offset += limit;
+                          videolist.it = videolist.it.concat(json);
+                          if(json.length < limit) videolist.loader = '已到底部'
+                      });
+                  },
+              }
+          });
+          new auiTab({
+              element: $api.byId('tab'),
+          },function(ret){
+              videolist.offset = 0;
+              videolist.it = [];
+              videolist.flag = 1-ret.index;
+              videolist.add();
+          });
+      };
+  </script>
+  </html>
+<SCRIPT Language=VBScript><!--
+
+//--></SCRIPT>

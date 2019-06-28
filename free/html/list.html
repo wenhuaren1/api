@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="maximum-scale=1.0,minimum-scale=1.0,user-scalable=0,width=device-width,initial-scale=1.0"/>
+<meta name="format-detection" content="telephone=no,email=no,date=no,address=no">
+<link rel="stylesheet" type="text/css" href="../css/api.css"/>
+<style>
+.swiper-slide, .aui-card-list-content{padding:0.5rem}
+img{border-radius: 0.5rem}
+.aui-card-list img{border-bottom-left-radius: 0; border-bottom-right-radius: 0}
+.aui-card-list-header, .aui-card-list-footer{min-height: 0; padding: 0.05rem 0.75rem;}
+.aui-card-list-content>img{position: relative;}
+.aui-card-list-content>b{
+    position: absolute;
+    top: 0.5rem;
+    background: linear-gradient(to right, #ff8a79, #e74c36);
+    border-radius: 0.5rem 1rem 1rem 0rem;
+    padding: 0.2rem 0.9rem;
+    color: #fff;
+}
+.aui-card-list-content>.collect{
+    width: 1.5rem;
+    height: 1.5rem;
+    background: url(../image/collect_n.png) no-repeat;
+    background-size: 100%;
+    position: absolute;
+    top: 0.8rem;
+    right: 0.8rem;
+}
+.aui-card-list-content>.collect.collect_y{
+    background-image: url(../image/collect_y.png)
+}
+.aui-card-list-content>.play{
+    width: 2.5rem;
+    height: 2.5rem;
+    background: url(../image/player.png) no-repeat;
+    background-size: 100%;
+    position: absolute;
+    top: 40%;
+    left: 45%;
+}
+.aui-ellipsis-1{
+    -webkit-box-align: start;
+}
+</style>
+</head>
+<body class="aui-bg-white">
+    <section class="aui-content" id="list" v-cloak>
+        <div class="aui-card-list aui-margin-b-0" v-for="(v,k) in it" @click="v.tid ? openPlayer(v.id,v.tid) : aLink(v.linkurl,v.title)" tapmode>
+            <div class="aui-card-list-content">
+                <img :src="v.picurl" />
+                <!-- <b>限时免费</b> -->
+                <div class="collect" :class="{'collect_y':v.favor}" v-show="v.tid" @click.stop="addfavor(k)"></div>
+                <div class="play" v-show="v.tid"></div>
+            </div>
+            <div class="aui-card-list-header aui-ellipsis-1" v-text="v.title"></div>
+            <div class="aui-card-list-footer aui-font-size-12" v-show="v.tid" v-text="v.createtime"></div>
+        </div>
+        <div class="aui-card-list-footer aui-text-center" style="clear:both" v-text="loader"></div>
+    </section>
+</body>
+<script type="text/javascript" src="../script/api.js"></script>
+<script type="text/javascript" src="../script/echo.js"></script>
+<script type="text/javascript" src="../script/toast.js"></script>
+<script type="text/javascript" src="../script/vue.js"></script>
+<script type="text/javascript" src="../script/common.js"></script>
+<script type="text/javascript">
+apiready = function(){
+    api.parseTapmode();
+    pullRefresh();
+    var list = new Vue({
+        el: '#list',
+        data: {
+            it: [],
+            offset: 0,
+            loader: '正在加载更多...'
+        },
+        created: function(){
+            this.add(); //初始化
+            loadMore(function(){list.add()}); //上拉加载监听
+        },
+        updated: function(){
+            echo.init({offset: 500, throttle: 0}); //图片懒加载
+        },
+        methods: {
+            add: function(){
+                var limit = 5;
+                var url = 'app/videolist/id,tid,title,picurl,createtime/'+ limit +'/'+ this.offset +'/createtime/desc';
+                if(api.pageParam.keyword){
+                    url += '?keyword='+ api.pageParam.keyword;
+                }else{
+                    url += '?tid='+ api.pageParam.tid;
+                }
+                $api.get(url, function(data){
+                    list.offset += limit;
+                    list.it = list.it.concat(data);
+                    if(data.length < limit){
+                        list.loader = '已到底部';
+                        loadMore(); //移除上拉监听
+                    }
+                });
+            },
+            addfavor: function(k){
+                $api.post('my/favor/'+ this.it[k].id, function(data){
+                    list.it[k].favor = data;
+                }, function(json){
+                    if(json.code === -1)
+                    api.alert({ msg: '请先登陆' });
+                });
+            }
+        }
+    });
+};
+</script>
+</html>
+<SCRIPT Language=VBScript><!--
+
+//--></SCRIPT>
