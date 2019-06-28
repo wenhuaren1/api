@@ -1,4 +1,4 @@
-var app_url = 'http://123.jjxhc.cn/v1/';
+var app_url = 'http://api.wenx.xin/v1/';
 var scheme_url = 'mitushow://';
 
 //api.js
